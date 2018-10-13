@@ -45,7 +45,7 @@ class TransproxyService : Service(), LocalDnsService.Interface {
                 "-b", DataStore.listenAddress,
                 "-u",
                 "-l", DataStore.portLocalDns.toString(),            // ss-tunnel listens on the same port as overture
-                "-L", data.profile!!.remoteDns.split(",").first().trim() + ":53",
+                "-L", data.profile!!.remoteDns.split("|").first().split(",").first().trim() + ":53",
                 "-c", data.shadowsocksConfigFile!!.absolutePath)    // config is already built by BaseService.Interface
         if (DataStore.tcpFastOpen) cmd += "--fast-open"
         data.processes.start(cmd)
