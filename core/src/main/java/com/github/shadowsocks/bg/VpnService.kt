@@ -181,8 +181,13 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                 .setMtu(VPN_MTU)
                 .addAddress(PRIVATE_VLAN.format(Locale.ENGLISH, "1"), 24)
 
-        profile.remoteDns.split("|").first().split(",").forEach { builder.addDnsServer(it.trim()) }
-
+        val mydns: String
+        if (profile.remoteDns.contains("|")) {
+            mydns = profile.remoteDns.split("|").last()
+        } else {
+            mydns = profile.remoteDns
+        }
+        mydns.split(",").forEach { builder.addDnsServer(it.trim()) }
         if (profile.ipv6) {
             builder.addAddress(PRIVATE_VLAN6.format(Locale.ENGLISH, "1"), 126)
             builder.addRoute("::", 0)
@@ -210,7 +215,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                     val subnet = Subnet.fromString(it)!!
                     builder.addRoute(subnet.address.hostAddress, subnet.prefixSize)
                 }
-                profile.remoteDns.split("|").first().split(",").mapNotNull { it.trim().parseNumericAddress() }
+                mydns.split(",").mapNotNull { it.trim().parseNumericAddress() }
                         .forEach { builder.addRoute(it, it.address.size shl 3) }
             }
         }
