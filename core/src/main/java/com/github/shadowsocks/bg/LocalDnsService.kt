@@ -77,7 +77,7 @@ object LocalDnsService {
                                 makeDns("Primary-2", "119.29.29.29:53", 9, false),
                                 makeDns("Primary-3", "114.114.114.114:53", 9, false)))
                     } else {
-                         localDns = JSONArray(remoteDNSString.split(",")
+                         localDns = JSONArray(localDNSString.split(",")
                                  .mapIndexed { i, dns -> makeDns("Primary-$i", dns.trim(), 6,false) })
                     }
                     when (profile.route) {
