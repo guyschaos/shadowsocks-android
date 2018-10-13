@@ -59,12 +59,27 @@ object LocalDnsService {
                     put("HostsFile", "hosts")
                     put("MinimumTTL", 120)
                     put("CacheSize", 4096)
-                    val remoteDns = JSONArray(profile.remoteDns.split(",")
+                    val remoteDNSString: String
+                    val localDNSString: String
+                    if (profile.remoteDns.contains("|")) {
+                        remoteDNSString = profile.remoteDns.split("|").first()
+                        localDNSString = profile.remoteDns.split("|").last()
+                    } else {
+                        remoteDNSString = profile.remoteDns
+                        localDNSString = ""
+                    }
+                    val remoteDns = JSONArray(remoteDNSString.split(",")
                             .mapIndexed { i, dns -> makeDns("UserDef-$i", dns.trim() + ":53", 12) })
-                    val localDns = JSONArray(arrayOf(
-                            makeDns("Primary-1", "208.67.222.222:443", 9, false),
-                            makeDns("Primary-2", "119.29.29.29:53", 9, false),
-                            makeDns("Primary-3", "114.114.114.114:53", 9, false)))
+                    val localDns: JSONArray
+                    if ("".equals(localDNSString)) {
+                         localDns = JSONArray(arrayOf(
+                                makeDns("Primary-1", "208.67.222.222:443", 9, false),
+                                makeDns("Primary-2", "119.29.29.29:53", 9, false),
+                                makeDns("Primary-3", "114.114.114.114:53", 9, false)))
+                    } else {
+                         localDns = JSONArray(remoteDNSString.split(",")
+                                 .mapIndexed { i, dns -> makeDns("Primary-$i", dns.trim(), 6,false) })
+                    }
                     when (profile.route) {
                         Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
                             put("PrimaryDNS", localDns)
